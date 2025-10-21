@@ -102,6 +102,39 @@ func executeSummaryCommand() {
 	fmt.Printf("Total expenses: 💲%v\n", summary)
 }
 
+func executeDeleteCommand(args []string) {
+	/*
+		delete --id 2
+
+		+ args[0] = delete
+		+ args[1] = --id
+		+ args[2] = 2
+	*/
+
+	if len(args) != 3 {
+		fmt.Println("Command isn't valid (The number of parameters is incorrect)")
+		return
+	}
+	if args[1] != "--id" {
+		fmt.Println("Command isn't valid (Must be --id)")
+	}
+
+	deletedID, err := strconv.Atoi(args[2])
+	if err != nil || deletedID < 0 {
+		fmt.Println("Command isn't valid (The deleted id isn't valid)")
+		return
+	}
+
+	_, exists := expenseMap[deletedID]
+	if !exists {
+		fmt.Println("The deleted id doesn't exist")
+		return
+	}
+
+	delete(expenseMap, deletedID)
+	fmt.Println("✖️ Expense deleted successfully")
+}
+
 func separateField(input string) []string {
 	input += " "
 
@@ -189,6 +222,9 @@ func main() {
 
 		case input != "" && args[0] == "summary":
 			executeSummaryCommand()
+
+		case input != "" && args[0] == "delete":
+			executeDeleteCommand(args)
 
 		default:
 			fmt.Println("Command isn't valid")
