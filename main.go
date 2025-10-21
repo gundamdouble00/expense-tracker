@@ -89,7 +89,7 @@ func executeAddCommand(args []string) {
 func executeListCommand() {
 	fmt.Printf("%-3s %-12s %-26s %s\n", "ID", "Date", "Description", "Amount")
 	for _, expense := range expenseMap {
-		fmt.Printf("%-3v %-12v %-26v $%v\n", expense.ID, expense.Date.Format("2006-01-02"), expense.Description, expense.Amount)
+		fmt.Printf("%-3v %-12v %-26v 💲%v\n", expense.ID, expense.Date.Format("2006-01-02"), expense.Description, expense.Amount)
 	}
 }
 
@@ -99,7 +99,7 @@ func executeSummaryCommand() {
 		summary += expense.Amount
 	}
 
-	fmt.Printf("Total expenses: $%v\n", summary)
+	fmt.Printf("Total expenses: 💲%v\n", summary)
 }
 
 func separateField(input string) []string {
