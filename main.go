@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-var mapFlag bool
 var countID int
 var expenseMap map[int]ExpenseInfo
 
@@ -58,19 +57,23 @@ func executeAddCommand(args []string) {
 		args[4] = 10
 	*/
 
+	/*
+		add --description 								"Lunch" --amount 20
+		add --description "Buy gifts for Kim Anh" --amount 	6
+	*/
+
 	if len(args) != 5 {
-		fmt.Println("Command isn't valid")
+		fmt.Println("Command isn't valid (The number of parameters is incorrect)")
 		return
 	}
 
 	description := strings.ReplaceAll(args[2], "\"", "")
 	amount, err := strconv.ParseFloat(args[4], 64)
 	if args[1] != "--description" || args[3] != "--amount" || err != nil {
-		fmt.Println("Command isn't valid")
+		fmt.Println("Command isn't valid (The attributes are incorrect)")
 		return
 	}
 
-	mapFlag = true
 	countID++
 	expenseMap[countID] = ExpenseInfo{
 		ID:          countID,
@@ -84,15 +87,48 @@ func executeAddCommand(args []string) {
 }
 
 func executeListCommand() {
-	fmt.Printf("%-3s %-12s %-12s %s\n", "ID", "Date", "Description", "Amount")
+	fmt.Printf("%-3s %-12s %-26s %s\n", "ID", "Date", "Description", "Amount")
 	for _, expense := range expenseMap {
-		fmt.Printf("%-3v %-12v %-12v %v\n", expense.ID, expense.Date.Format("2006-01-02"), expense.Description, expense.Amount)
+		fmt.Printf("%-3v %-12v %-26v $%v\n", expense.ID, expense.Date.Format("2006-01-02"), expense.Description, expense.Amount)
+	}
+}
+
+func separateField(input string) []string {
+	input += " "
+
+	field := ""
+	args := []string{}
+	runeInput := []rune(input)
+	lenOfInput := len(runeInput)
+
+	for i := 0; i < lenOfInput; i++ {
+		character_i := string(runeInput[i])
+
+		if character_i == "\"" {
+			for j := i + 1; j < lenOfInput; j++ {
+				character_j := string(runeInput[j])
+				if character_j == "\"" {
+					i = j + 1
+					break
+				}
+				field += character_j
+			}
+
+			args = append(args, field)
+			field = ""
+			continue
+		}
+
+		if character_i == " " {
+			args = append(args, field)
+			field = ""
+			continue
+		}
+
+		field += character_i
 	}
 
-	if mapFlag {
-		writeToAJSONFile()
-		mapFlag = false
-	}
+	return args
 }
 
 func headerOfCLI() {
@@ -103,7 +139,6 @@ func headerOfCLI() {
 func setUp() {
 	expenseMap = make(map[int]ExpenseInfo)
 	readFromAJSONFile()
-	mapFlag = false
 
 	for _, expense := range expenseMap {
 		countID = max(countID, expense.ID)
@@ -122,7 +157,7 @@ func main() {
 		fmt.Print("expense-tracker> ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
-		args := strings.Fields(input)
+		args := separateField(input)
 
 		switch {
 		case input == "":
@@ -144,9 +179,7 @@ func main() {
 			executeListCommand()
 
 		default:
-			for i, parameter := range args {
-				fmt.Printf("%v. %v\n", i, parameter)
-			}
+			fmt.Println("Command isn't valid")
 		}
 	}
 }
