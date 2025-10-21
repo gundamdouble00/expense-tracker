@@ -93,6 +93,15 @@ func executeListCommand() {
 	}
 }
 
+func executeSummaryCommand() {
+	summary := 0.0
+	for _, expense := range expenseMap {
+		summary += expense.Amount
+	}
+
+	fmt.Printf("Total expenses: $%v\n", summary)
+}
+
 func separateField(input string) []string {
 	input += " "
 
@@ -177,6 +186,9 @@ func main() {
 
 		case input != "" && args[0] == "list":
 			executeListCommand()
+
+		case input != "" && args[0] == "summary":
+			executeSummaryCommand()
 
 		default:
 			fmt.Println("Command isn't valid")
