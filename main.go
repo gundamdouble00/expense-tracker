@@ -93,22 +93,53 @@ func executeListCommand() {
 	}
 }
 
-func executeSummaryCommand() {
+func executeSummaryCommand(args []string) {
+	/*
+		summary
+			+ args[0] = summary
+
+		summary --month 8
+			+ args[0] = summary
+			+ args[1] = --month
+			+ args[2] = 8
+	*/
+
 	summary := 0.0
-	for _, expense := range expenseMap {
-		summary += expense.Amount
+
+	if len(args) == 1 {
+		for _, expense := range expenseMap {
+			summary += expense.Amount
+		}
+		fmt.Printf("Total expenses: 💲%v\n", summary)
+		return
 	}
 
-	fmt.Printf("Total expenses: 💲%v\n", summary)
+	if len(args) == 3 {
+		month, err := strconv.Atoi(args[2])
+		if args[1] != "--month" || err != nil || month < 1 || 12 < month {
+			fmt.Println("The command isn't valid (The attribute is incorrect)")
+			return
+		}
+
+		for _, expense := range expenseMap {
+			if expense.Date.Month() == time.Month(month) {
+				summary += expense.Amount
+			}
+		}
+
+		fmt.Printf("Total expense for %v: 💲%v\n", time.Month(month), summary)
+		return
+	}
+
+	fmt.Println("The command isn't valid")
 }
 
 func executeDeleteCommand(args []string) {
 	/*
 		delete --id 2
-
-		+ args[0] = delete
-		+ args[1] = --id
-		+ args[2] = 2
+			+ args[0] = delete
+			+ args[1] = --id
+			+ args[2] = 2
 	*/
 
 	if len(args) != 3 {
@@ -188,7 +219,6 @@ func setUp() {
 }
 
 func main() {
-	// fmt.Printf("%v\n\n", exec.Command("clear"))
 	setUp()
 
 	reader := bufio.NewReader(os.Stdin)
@@ -221,7 +251,7 @@ func main() {
 			executeListCommand()
 
 		case input != "" && args[0] == "summary":
-			executeSummaryCommand()
+			executeSummaryCommand(args)
 
 		case input != "" && args[0] == "delete":
 			executeDeleteCommand(args)
